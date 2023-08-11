@@ -5,21 +5,34 @@ name: Restrict Podfile Update
 
 on:
   push:
-    paths:
-      - 'Podfile' # 监听特定文件的更新
+    branches:
+      - main
 
 jobs:
-  restrict_update:
+  grant-permissions:
     runs-on: macos-latest
 
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v3
       
-    - name: Check if specific file was updated
-      id: check_file
-      run: echo "File has been updated" # 这里可以写你需要执行的脚本
+    - name: Grant permissions
+      run:  |
+        # Replace 'username' with the GitHub username of the person you want to grant permissions to
+        USER="leo.huang@easyhealthcarecorp.com"
+
+        # Replace 'path/to/file' with the path to the file you want to grant permissions for
+        FILE="Test/Podfile"
+
+        # Grant write permission to the user for the specific file
+        git update-index --add --cacheinfo 100644 $(git rev-parse HEAD):$FILE
+        git commit -m "Grant write permission to $USER for $FILE"
+        git push origin HEAD:main
+
+        # Create a pull request to apply the changes
+        HUB_PR_NUMBER=$(hub pull-request -m "Grant write permission to $USER for $FILE" -b main -h $USER:main | awk '/https:\/\/github.com\/.*\/pull\// {print $NF}' | sed 's/.$//')
+        echo "Pull request created: $HUB_PR_NUMBER"
+      env:
+        GITHUB_TOKEN: ${{ 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 }}
+
       
-    - name: Notify if file was updated
-      if: steps.check_file.outputs.result == 'File has been updated'
-      run: echo "The restricted file was updated."
