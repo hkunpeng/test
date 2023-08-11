@@ -6,8 +6,5 @@ target 'Test' do
   use_frameworks!
 
   # Pods for Test
-  ####
-  ###
-###
-	###ß	ddddd
+
 end
