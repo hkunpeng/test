@@ -5,7 +5,6 @@ name: Restrict Podfile Update
 
 on:
   push:
-    branches: [ "main" ]
     paths:
       - 'Podfile' # 监听特定文件的更新
 
