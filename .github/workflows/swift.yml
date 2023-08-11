@@ -17,21 +17,73 @@ jobs:
       uses: actions/checkout@v3
       
     - name: Grant permissions
-      run:  |
-        # Replace 'username' with the GitHub username of the person you want to grant permissions to
-        USER="leo.huang@easyhealthcarecorp.com"
+      run: |
+      #!/usr/bin/env bash
+#Fork hook from https://github.com/github/platform-samples/tree/master/pre-receive-hooks
+#
+# Pre-receive hook that will block any new commits that contain files ending
+# with .gz, .zip or .tgz
+#
+# More details on pre-receive hooks and how to apply them can be found on
+# https://help.github.com/enterprise/admin/guides/developer-workflow/managing-pre-receive-hooks-on-the-github-enterprise-appliance/
+#
+# zero_commit="0000000000000000000000000000000000000000"
+# Do not traverse over commits that are already in the repository
+# (e.g. in a different branch)
+# This prevents funny errors if pre-receive hooks got enabled after some
+# commits got already in and then somebody tries to create a new branch
+# If this is unwanted behavior, just set the variable to empty
+echo $GL_USERNAME
 
-        # Replace 'path/to/file' with the path to the file you want to grant permissions for
-        FILE="Test/Podfile"
 
-        # Grant write permission to the user for the specific file
-        git update-index --add --cacheinfo 100644 $(git rev-parse HEAD):$FILE
-        git commit -m "Grant write permission to $USER for $FILE"
-        git push origin HEAD:main
+# 定义允许哪些用户可以对指定文件修改
+AGREE_USER=("root" "syb")
+# 指定文件
+MANAGE_FILES=("Podfile" "application-pro.yml" "bootstrap-pro.yml")
 
-        # Create a pull request to apply the changes
-        HUB_PR_NUMBER=$(hub pull-request -m "Grant write permission to $USER for $FILE" -b main -h $USER:main | awk '/https:\/\/github.com\/.*\/pull\// {print $NF}' | sed 's/.$//')
-        echo "Pull request created: $HUB_PR_NUMBER"
+# 是否过滤指定文件
+IS_FILTER= 0
+
+# 判断当前提交的用户是否在授权用户列表中
+EXIT_USER=0
+
+excludeExisting="--not --all"
+
+while read oldrev newrev refname; do
+# echo "payload"
+echo $refname $oldrev $newrev
+# branch or tag get deleted
+if [ "$newrev" = "$zero_commit" ]; then
+continue
+fi
+# Check for new branch or tag
+if [ "$oldrev" = "$zero_commit" ]; then
+    span=`git rev-list $newrev $excludeExisting`
+else
+    span=`git rev-list $oldrev..$newrev $excludeExisting`
+fi
+for COMMIT in $span; do
+ for FILE  in `git log -1 --name-only --pretty=format:'' $COMMIT`; do
+  for(( i=0;i<${#MANAGE_FILES[@]};i++)) do
+    if [[ "$FILE" == *${MANAGE_FILES[i]}  ]];then
+     IS_FILTER=1
+    fi
+  done
+ done
+done
+done
+
+for(( i=0;i<${#AGREE_USER[@]};i++)) do
+ if [[ ${AGREE_USER[i]} == $GL_USERNAME ]];then
+  EXIT_USER=1
+ fi
+done
+if [ $IS_FILTER == 1 ] && [ $EXIT_USER != 1 ]; then
+# if [ $IS_YML == 1 ]; then
+#if [ $EXIT_USER == 1 ]; then
+ exit 1
+fi
+exit 0
       env:
         GITHUB_TOKEN: ${{ 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 }}
 
