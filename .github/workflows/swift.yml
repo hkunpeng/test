@@ -1,0 +1,26 @@
+# This workflow will build a Swift project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-swift
+
+name: Restrict Podfile Update
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'Podfile' # 监听特定文件的更新
+
+jobs:
+  restrict_update:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      
+    - name: Check if specific file was updated
+      id: check_file
+      run: echo "File has been updated" # 这里可以写你需要执行的脚本
+      
+    - name: Notify if file was updated
+      if: steps.check_file.outputs.result == 'File has been updated'
+      run: echo "The restricted file was updated."
