@@ -19,7 +19,6 @@ jobs:
     - name: Grant permissions
       run: |
      
-      env:
-        GITHUB_TOKEN: ${{ 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 }}
+
 
       
