@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #管理员邮箱账号数组
-adminEmailArray=("xxx@qq.com")
+adminEmailArray=("leo.huang@easyhealthcarecorp.com")
 #不能修改的文件数组
 fileNameArray=("Podfile" "pod.sh" )
 #检查的分支数组
@@ -32,11 +32,18 @@ info() {
 
 #是否可以修改，0不可以，1可以
 canModify() {
+    #0、是否有权限
+    hasPermission
+    permission=$?
+    if [[ ${permission} -eq 1 ]]; then
+        return 1
+    fi
+     
     #1、当前分支是否在检查的范围内
     containBranch=0
     for value in ${checkBranches[@]}
     do 
-        if [[ ${branch} -eq value ]]; then
+        if [[ ${branch} == value ]]; then
             containBranch=1
         fi
     done
@@ -52,6 +59,17 @@ canModify() {
     return 1
 }
 
+#账号是否有权限
+hasPermission() {
+    for value in ${adminEmailArray[@]}
+    do
+        if [ ${value} == ${email} ]; then
+         return 1
+        fi
+    done;
+    return 0
+}
+
 checkFiles() {
     for value in ${fileNameArray[@]}
     do
@@ -61,6 +79,7 @@ checkFiles() {
          return 0
         fi
     done;
+    log "可以提交修改"
     return 1
 }
 
