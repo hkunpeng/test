@@ -6,10 +6,10 @@
 # it wants to stop the commit.
 #
 # To enable this hook, rename this file to "pre-commit".
-
 commitFileNames=$(git diff --cached --name-only --diff-filter=ACM --)
 dir=$(cd `dirname $0`; pwd)
 cd ${dir}
+#执行文件修改权限检查
 sh ../../check.sh ${commitFileNames}
 result=$?
 if [ ${result} -eq 1 ]; then
