@@ -32,24 +32,26 @@ info() {
 
 #是否可以修改，0不可以，1可以
 canModify() {
-    #0、是否有权限
-    hasPermission
-    permission=$?
-    if [[ ${permission} -eq 1 ]]; then
-        return 1
-    fi
-     
-    #1、当前分支是否在检查的范围内
-    containBranch=0
-    for value in ${checkBranches[@]}
-    do 
-        if [[ ${branch} == value ]]; then
-            containBranch=1
+    #0.账号是否有权限
+    for value in ${adminEmailArray[@]}
+    do
+        if [[ ${email} == $value  ]]; then
+            return 1
         fi
-    done
-    if [[ ${containBranch} == 0 ]]; then
-        return 1
-    fi
+    done;
+    
+    
+    #1、当前分支是否在检查的范围内
+    # containBranch=0
+    # for value in ${checkBranches[@]}
+    # do
+    #     if [[ ${branch} == value ]]; then
+    #         containBranch=1
+    #     fi
+    # done
+    # if [[ ${containBranch} == 0 ]]; then
+    #     return 1
+    # fi
 
     #2、修改的文件是否在检查范围内
     if [[ ${modifyFileNames} == *$1* ]]; then
@@ -57,17 +59,6 @@ canModify() {
         return 0
     fi
     return 1
-}
-
-#账号是否有权限
-hasPermission() {
-    for value in ${adminEmailArray[@]}
-    do
-        if [ ${value} == ${email} ]; then
-         return 1
-        fi
-    done;
-    return 0
 }
 
 checkFiles() {
@@ -85,7 +76,7 @@ checkFiles() {
 
 main() {
     info "当前用户: $email"
-    info "当前分支: $branch, 你修改了文件: $modifyFileNames" 
+    info "当前分支: $branch, 你修改了文件: $modifyFileNames"
 
     checkFiles
     result=$?
