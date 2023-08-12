@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #管理员邮箱账号数组
-adminEmailArray=("leo.huang@easyhealthcarecorp.com1")
+adminEmailArray=("xxx@qq.com")
 #不能修改的文件数组
 fileNameArray=("Podfile" "pod.sh" )
 #检查的分支数组
