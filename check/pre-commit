@@ -10,12 +10,12 @@ commitFileNames=$(git diff --cached --name-only --diff-filter=ACM --)
 dir=$(cd `dirname $0`; pwd)
 cd ${dir}
 #执行文件修改权限检查
-sh ../../check.sh ${commitFileNames}
+echo ${dir}
+sh ../../check/check.sh ${commitFileNames}
 result=$?
 if [ ${result} -eq 1 ]; then
     exit 1
 fi
-
 
 if git rev-parse --verify HEAD >/dev/null 2>&1; then
     against=HEAD
