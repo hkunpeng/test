@@ -1,15 +1,19 @@
 #!/bin/sh
 
 #管理员邮箱账号数组
-adminEmailArray=("leo.huang@easyhealthcarecorp.com1")
+adminEmailArray=("leo.huang@easyhealthcarecorp.com")
 #不能修改的文件数组
 fileNameArray=("Podfile" "pod.sh" )
-#修改的文件 git diff --cached --name-only --diff-filter=ACM --
-names=$(git diff --cached --name-only --diff-filter=ACM --)
+#检查的分支数组
+checkBranches=("dev1 dev2 master main")
+#修改的文件
+modifyFileNames=$(git diff --cached --name-only --diff-filter=ACM --)
 if [ -n "${1}" ]; then
-    names="${1}"
+    modifyFileNames="${1}"
 fi
-
+#当前分支名称
+branch=$(git branch --show-current)
+#当前用户邮箱
 email=$(git config user.email)
 
 log() {
@@ -26,8 +30,31 @@ info() {
     log "[${GREEN}INFO${PLAIN}] ---> $1"
 }
 
+#是否可以修改，0不可以，1可以
 canModify() {
-    if [[ ${names} == *$1* ]]; then
+    #0.账号是否有权限
+    for value in ${adminEmailArray[@]}
+    do
+        if [[ ${email} == $value  ]]; then
+            return 1
+        fi
+    done;
+    
+    
+    #1、当前分支是否在检查的范围内
+    # containBranch=0
+    # for value in ${checkBranches[@]}
+    # do
+    #     if [[ ${branch} == value ]]; then
+    #         containBranch=1
+    #     fi
+    # done
+    # if [[ ${containBranch} == 0 ]]; then
+    #     return 1
+    # fi
+
+    #2、修改的文件是否在检查范围内
+    if [[ ${modifyFileNames} == *$1* ]]; then
         error "你没有权限修改文件：$1, 请联系文件拥有人：${adminEmailArray[*]}"
         return 0
     fi
@@ -43,12 +70,13 @@ checkFiles() {
          return 0
         fi
     done;
+    log "可以提交修改"
     return 1
 }
 
 main() {
     info "当前用户: $email"
-    info "你修改了文件: $names" 
+    info "当前分支: $branch, 你修改了文件: $modifyFileNames"
 
     checkFiles
     result=$?
